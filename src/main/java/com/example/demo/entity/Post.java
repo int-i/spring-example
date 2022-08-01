@@ -28,27 +28,43 @@ public class Post {
     public Post() {
     }
 
-    public Integer getAuthorId() {
-        return author.getId();
+    public Integer getId() {
+        return id;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public List<Comment> getComments() {
-        return comments;
+    public User getAuthor() {
+        return author;
     }
 
     public void setAuthor(User author) {
         this.author = author;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void addComments(Comment comment) {
+        comments.add(comment);
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 }
