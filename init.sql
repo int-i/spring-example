@@ -1,7 +1,8 @@
 CREATE TABLE users
 (
-    id   INT         NOT NULL PRIMARY KEY,
-    name VARCHAR(10) NOT NULL
+    id              INT          NOT NULL PRIMARY KEY,
+    name            VARCHAR(10)  NOT NULL,
+    password_hashed VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE posts
