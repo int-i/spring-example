@@ -5,12 +5,12 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.demo.entity.User;
 import com.example.demo.service.UserSecurityService;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,11 +21,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-public class JwtSecurityFilter extends OncePerRequestFilter {
+public class JwtDecodeFilter extends OncePerRequestFilter {
     private final UserSecurityService userSecurityService;
     private final Environment env;
 
-    public JwtSecurityFilter(UserSecurityService userSecurityService, Environment env) {
+    public JwtDecodeFilter(UserSecurityService userSecurityService, Environment env) {
         this.userSecurityService = userSecurityService;
         this.env = env;
     }
@@ -40,8 +40,8 @@ public class JwtSecurityFilter extends OncePerRequestFilter {
                 JWTVerifier verifier = JWT.require(algorithm).withIssuer(env.getProperty("jwt.issuer")).build();
                 DecodedJWT jwt = verifier.verify(accessToken);
                 String username = jwt.getSubject();
-                System.out.println("JWT user_id=" + username);
-                UserDetails user = userSecurityService.loadUserByUsername(username);
+                System.out.println("Verify JWT: user_id=" + username);
+                User user = (User) userSecurityService.loadUserByUsername(username);
                 Authentication authenticationToken = new UsernamePasswordAuthenticationToken(user, null);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             } catch (JWTVerificationException exception) {
