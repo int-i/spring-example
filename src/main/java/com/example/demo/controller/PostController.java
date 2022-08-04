@@ -7,6 +7,7 @@ import com.example.demo.entity.User;
 import com.example.demo.repository.PostLikeRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +25,8 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    String createPost(@RequestBody CreatePost body) {
-        System.out.println("Create post");
+    String createPost(@AuthenticationPrincipal User user, @RequestBody CreatePost body) {
+        System.out.println("Create post: " + user.getId());
         User author = userRepository.findById(body.getAuthor()).orElseThrow();
         Post newPost = new Post(author, body.getTitle(), body.getContent());
         postRepository.save(newPost);
