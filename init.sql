@@ -14,6 +14,15 @@ CREATE TABLE posts
     FOREIGN KEY (author_id) REFERENCES users (id)
 );
 
+CREATE TABLE post_likes
+(
+    post_id INT NOT NULL,
+    user_id INT NOT NULL,
+    PRIMARY KEY (post_id, user_id),
+    FOREIGN KEY (post_id) REFERENCES posts (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
 CREATE TABLE comments
 (
     id        INT  NOT NULL PRIMARY KEY AUTO_INCREMENT,
