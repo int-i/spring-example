@@ -12,6 +12,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
     public JwtLoginFilter(AuthenticationManager authenticationManager) {
@@ -31,7 +32,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
                     .sign(algorithm);
             System.out.println("Create JWT: user_id=" + username);
             response.addCookie(new Cookie("access_token", accessToken));
-        } catch (JWTCreationException exception) {
+            response.getWriter().write(accessToken);
+        } catch (JWTCreationException | IOException exception) {
             exception.printStackTrace();
         }
     }
