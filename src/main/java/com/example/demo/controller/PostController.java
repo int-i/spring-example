@@ -7,9 +7,11 @@ import com.example.demo.entity.User;
 import com.example.demo.repository.PostLikeRepository;
 import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Serializable;
 import java.util.List;
 
 @RestController
@@ -18,6 +20,24 @@ public class PostController {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
 
+    public static class PostDto  {
+        private String title;
+        private String content;
+
+        public PostDto(String title, String content) {
+            this.title = title;
+            this.content = content;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getContent() {
+            return content;
+        }
+    }
+
     public PostController(UserRepository userRepository, PostRepository postRepository, PostLikeRepository postLikeRepository) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
@@ -25,12 +45,12 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    String createPost(@AuthenticationPrincipal User user, @RequestBody CreatePost body) {
+    PostDto createPost(@AuthenticationPrincipal User user, @RequestBody CreatePost body) {
         System.out.println("Create post: " + user.getId());
         User author = userRepository.findById(body.getAuthor()).orElseThrow();
         Post newPost = new Post(author, body.getTitle(), body.getContent());
         postRepository.save(newPost);
-        return "OK";
+        return new PostDto(newPost.getTitle(), newPost.getContent());
     }
 
     @GetMapping("/posts/{postId}")
