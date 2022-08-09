@@ -1,97 +1,65 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Comment;
 import com.example.demo.entity.Post;
 import com.example.demo.entity.PostLike;
 import com.example.demo.entity.User;
 import com.example.demo.repository.PostLikeRepository;
 import com.example.demo.repository.PostRepository;
-import com.example.demo.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.Serializable;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 @RestController
 public class PostController {
-    private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
 
-    public static class PostDto  {
-        private String title;
-        private String content;
-
-        public PostDto(String title, String content) {
-            this.title = title;
-            this.content = content;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getContent() {
-            return content;
-        }
-    }
-
-    public PostController(UserRepository userRepository, PostRepository postRepository, PostLikeRepository postLikeRepository) {
-        this.userRepository = userRepository;
+    public PostController(PostRepository postRepository, PostLikeRepository postLikeRepository) {
         this.postRepository = postRepository;
         this.postLikeRepository = postLikeRepository;
     }
 
     @PostMapping("/posts")
-    PostDto createPost(@AuthenticationPrincipal User user, @RequestBody CreatePost body) {
-        System.out.println("Create post: " + user.getId());
-        User author = userRepository.findById(body.getAuthor()).orElseThrow();
-        Post newPost = new Post(author, body.getTitle(), body.getContent());
-        postRepository.save(newPost);
-        return new PostDto(newPost.getTitle(), newPost.getContent());
+    GetPost createPost(@AuthenticationPrincipal User author, @RequestBody CreatePost body) {
+        Post newPost = postRepository.save(new Post(author, body.title(), body.content()));
+        return new GetPost(newPost.getId(), newPost.getAuthor().getId(), newPost.getTitle(), newPost.getContent());
+    }
+
+    @GetMapping("/posts")
+    List<GetPost> getPosts() {
+        return StreamSupport.stream(postRepository.findAll().spliterator(), false)
+                .map(post -> new PostController.GetPost(post.getId(), post.getAuthor().getId(), post.getTitle(), post.getContent()))
+                .toList();
     }
 
     @GetMapping("/posts/{postId}")
-    Post getPost(@PathVariable Integer postId) {
-        return postRepository.findById(postId).orElseThrow();
-    }
-
-    @GetMapping("/posts/{postId}/comments")
-    List<Comment> getComments(@PathVariable Integer postId) {
-        return postRepository.findById(postId).orElseThrow().getComments();
-    }
-
-    @PostMapping("/posts/{postId}/like/{userId}")
-    void likePost(@PathVariable Integer postId, @PathVariable Integer userId) {
+    GetPost getPost(@PathVariable Integer postId) {
         Post post = postRepository.findById(postId).orElseThrow();
-        User user = userRepository.findById(userId).orElseThrow();
+        return new GetPost(post.getId(), post.getAuthor().getId(), post.getTitle(), post.getContent());
+    }
+
+    // @GetMapping("/posts/{postId}/comments")
+    // List<Comment> getComments(@PathVariable Integer postId) {
+    //     return postRepository.findById(postId).orElseThrow().getComments();
+    // }
+
+    @PostMapping("/posts/{postId}/likes")
+    void likePost(@AuthenticationPrincipal User user, @PathVariable Integer postId) {
+        Post post = postRepository.findById(postId).orElseThrow();
         PostLike newLike = new PostLike(post, user);
         if (postLikeRepository.findById(newLike.getId()).isEmpty()) {
             postLikeRepository.save(newLike);
         } else {
-            // delete
+            postLikeRepository.deleteById(newLike.getId());
         }
     }
 
-    private static class CreatePost {
-        private Integer author; // user id
+    public record GetPost(Integer id, @JsonProperty("author_id") Integer authorId, String title, String content) {
+    }
 
-        private String title;
-
-        private String content;
-
-        public Integer getAuthor() {
-            return author;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getContent() {
-            return content;
-        }
+    public record CreatePost(String title, String content) {
     }
 }

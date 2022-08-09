@@ -28,6 +28,12 @@ public class User implements UserDetails {
         this.posts = posts;
     }
 
+    public User(Integer id, String name, String passwordHashed) {
+        this.id = id;
+        this.name = name;
+        this.passwordHashed = passwordHashed;
+    }
+
     public User() {
     }
 
