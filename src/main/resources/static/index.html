@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+</head>
+
+<body>
+    <main>
+        <section>
+            <button id="sign-up">Sign Up</button>
+            <script lang="javascript">
+                console.log('Sign Up');
+                document.getElementById('sign-up').addEventListener('click', () => {
+                    fetch('/users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: window.prompt('id'),
+                            name: window.prompt('name'),
+                            password: window.prompt('password'),
+                        })
+                    })
+                        .then((res) => res.json())
+                        .then((data) => console.log(data))
+                        .catch((err) => console.log(err))
+                });
+            </script>
+        </section>
+        <section>
+            <button id="login">Login</button>
+            <script lang="javascript">
+                console.log('Login');
+                document.getElementById('login').addEventListener('click', () => {
+                    fetch('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            id: window.prompt('id'),
+                            password: window.prompt('password'),
+                        })
+                    })
+                        .then((res) => res.text())
+                        .then((data) => console.log(data))
+                        .catch((err) => console.log(err))
+                });
+            </script>
+        </section>
+    </main>
+</body>
+
+</html>
